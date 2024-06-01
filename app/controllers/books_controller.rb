@@ -7,7 +7,13 @@ class BooksController < ApplicationController
   end
 
   def index
-    @books = Book.all
+    @books = Book.includes(:favorites).all
+    # 1週間以内のfavorites数でソートする
+    @books = @books.sort do |a, b|
+      # いいねの数で降順にする
+      b.favorites.select { |fav| fav.created_at > 1.week.ago }.size <=>
+      a.favorites.select { |fav| fav.created_at > 1.week.ago }.size
+    end
     @book = Book.new
   end
 
