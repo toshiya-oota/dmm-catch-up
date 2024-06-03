@@ -8,19 +8,18 @@ class UsersController < ApplicationController
     
     @currentUserEntry = Entry.where(user_id: current_user.id)
     @userEntry = Entry.where(user_id: @user.id)
-    # リファクタリングする
-    if @user.id == current_user.id
-    else
-      @currentUserEntry.each do |cu|
-        @userEntry.each do |u|
-          if cu.room_id == u.room_id
+
+    # DM機能
+    if @user.id != current_user.id
+      @currentUserEntry.each do |current_user_entry|
+        @userEntry.each do |user_entry|
+          if current_user_entry.room_id == user_entry.room_id
             @isRoom = true
-            @roomId = cu.room_id
+            @roomId = current_user_entry.room_id
           end
         end
       end
-      if @isRoom
-      else
+      unless @isRoom
         @room = Room.new
         @entry = Entry.new
       end
