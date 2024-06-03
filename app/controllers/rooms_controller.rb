@@ -1,23 +1,34 @@
 class RoomsController < ApplicationController
   before_action :authenticate_user!
-
+  
   def create
-    @room = Room.create(user_id: current_user.id)
-    @entry1 = Entry.create(:room_id => @room.id, :user_id => current_user.id)
-    @entry2 = Entry.create(params.require(:entry).permit(:user_id, :room_id).merge(:room_id => @room.id))
-    redirect_to "/rooms/#{@room.id}"
+    @room = Room.new(user_id: current_user.id)
+    @entry1 = @room.entries.build(user_id: current_user.id)
+    @entry2 = @room.entries.build(entry_params)
+
+    if @room.save
+      redirect_to @room, notice: 'チャットルームが作成されました。'
+    else
+      flash[:alert] = 'チャットルームの作成に失敗しました。'
+      redirect_to user_path(current_user)
+    end
   end
 
   def show
     @room = Room.find(params[:id])
-    if Entry.where(:user_id => current_user.id, :room_id => @room.id).present?
+    if Entry.where(user_id: current_user.id, room_id: @room.id).present?
       @messages = @room.messages
       @message = Message.new
       @entries = @room.entries
-    #Roomで相手の名前表示するために記述
       @myUserId = current_user.id
     else
       redirect_back(fallback_location: root_path)
     end
+  end
+  
+  private
+
+  def entry_params
+    params.require(:entry).permit(:user_id)
   end
 end

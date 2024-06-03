@@ -3,13 +3,13 @@
     <div class='col-md-3'>
       <h2>User info</h2>
       <%= render 'info', user: @user %>
-      <% unless @user.id == current_user.id %>
-        <!--フォロワー限定条件入れる-->
+      <% #if @user.id != current_user.id && current_user.following?(@user) && @user.following?(current_user) %>
+      <% if @user.id != current_user.id %>
         <% if @isRoom == true %>
           <p class="user-show-room"><a href="/rooms/<%= @roomId %>" class="btn btn-primary btn-lg">チャットへ</a>
         <% else %>
-          <%= form_for @room do |f| %>
-            <%= fields_for @entry do |e| %>
+          <%= form_with model: @room, local: true do |f| %>
+             <%= fields_for @entry do |e| %>
               <%= e.hidden_field :user_id, value: @user.id %>
             <% end %>
             <%= f.submit "チャットを始める", class:"btn btn-primary btn-lg user-show-chat"%>
